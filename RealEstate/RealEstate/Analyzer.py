@@ -89,7 +89,7 @@ def readMail():
                 if "expose" in firstLink:
                     print(firstLink)
             # print(cleanedText)
-            # print("\n\n\n")
+            print("\n\n\n")
             # print(repr(body))
             # print ('Message %s: %s' % (curmail, subject))
             # print ('Raw Date:', msg['Date'])
