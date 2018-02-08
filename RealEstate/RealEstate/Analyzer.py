@@ -6,6 +6,7 @@ import email.header
 import datetime
 import re
 
+#class mailreader:
 def writeMail(receiver):
     TO = 'jenja.dietrich@gmail.com' #replace by reciver
     SUBJECT = 'TEST MAIL'
@@ -73,22 +74,10 @@ def readMail():
             body = get_first_text_block(msg)
             cleanedText = body.replace("\n", "").replace("=\r", "").replace("\r","")
             links = list(re.findall(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=$]*)', cleanedText))
-            complete = [] #falsche links, vielleicht fehlendes stück auffüllen mit standart immoscout string
-            for i in links:
-                if i[0] == 'www.':
-                    complete.append( i[0] + i[1] )
+            
+            complete = getExposeLinks(links)
+            print(complete)
 
-            if links.count != 0:
-                link = links.group()
-                countGroup = links.group().count
-                group = []
-                for i in links:
-                    group.append(i)
-                    print(i)
-                firstLink = link.replace('Scout-ID:',"")
-                if "expose" in firstLink:
-                    print(firstLink)
-            # print(cleanedText)
             print("\n\n\n")
             # print(repr(body))
             # print ('Message %s: %s' % (curmail, subject))
@@ -100,8 +89,16 @@ def readMail():
             if date_tuple:
                 local_date = datetime.datetime.fromtimestamp(
                     email.utils.mktime_tz(date_tuple))
-                #print ("Local Date:", local_date.strftime("%a, %d %b %Y %H:%M:%S"))
 
+def getExposeLinks(links):
+    complete = []
+    for i in links:
+        if i[0] == 'www.' and 'expose' in i[1] and 'redirecttocontactform' not in i[1]:
+            exposeLink = "https://" + i[0] + "immobilienscout24.de" + i[1]
+            if exposeLink not in complete:
+                complete.append( exposeLink )
+                #print ("Local Date:", local_date.strftime("%a, %d %b %Y %H:%M:%S"))
+    return complete
     
     # raw_email = data[0][1]
     # #print(raw_email)
@@ -109,7 +106,6 @@ def readMail():
     # print(raw_email.decode("utf-8"))
     
 
-
-readMail()
+#readMail()
 
 
