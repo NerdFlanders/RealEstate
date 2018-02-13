@@ -74,7 +74,7 @@ class mailreader:
                 links = list(re.findall(r'https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&\/\/=$]*)', cleanedText))
                 
                 complete = self.__getExposeLinks(links)
-                logging.debug(complete + "\n")
+                logging.debug(complete)
                 allLinksToExpose.append(complete)
                 
         return allLinksToExpose
