@@ -1,3 +1,4 @@
 /credentials.py
 RealEstate/RealEstate/credentials.py
 *.pyc
+/RealEstate/RealEstate/credentials.py
