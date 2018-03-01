@@ -6,6 +6,8 @@ import email.header
 import datetime
 import re
 import logging
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
 
 logging.basicConfig(level=logging.DEBUG)
 logging.disable(logging.CRITICAL)
@@ -13,36 +15,9 @@ logging.disable(logging.CRITICAL)
 class mailreader:
     def __init__(self):
         logging.debug("mailreader created")
-        
-    def __writeMail(self,receiver):
-        TO = 'jenja.dietrich@gmail.com' #replace by reciver
-        SUBJECT = 'TEST MAIL'
-        TEXT = 'Here is a message from python.'
-
-        SMTP_SERVER = "imap.gmail.com"
-        SMTP_PORT   = 993
-
-        # Gmail Sign In
-        
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.ehlo()
-        server.starttls()
-        server.login(cd.gmail_acc, cd.gmail_passwd)
-
-        BODY = '\r\n'.join(['To: %s' % TO,
-                            'From: %s' % gmail_sender,
-                            'Subject: %s' % SUBJECT,
-                            '', TEXT])
-
-        try:
-            #server.sendmail(gmail_sender, [TO], BODY)
-            print ('fake email sent')
-        except:
-            print ('error sending mail')
-
-        server.quit()
-
-    def __readMail__(self, test):        
+      
+    
+    def readMail(self, test):        
         IMAP_SERVER = "imap.gmail.com"
         IMAP_PORT   = 993
 
@@ -50,7 +25,7 @@ class mailreader:
         readServer.login(cd.gmail_acc, cd.gmail_passwd)
 
         readServer.select('inbox')
-        result, data = readServer.uid('search', None, 'ALL')
+        result, data = readServer.uid('search', None, '(UNSEEN)')
         latest_email_uid = data[0].split()[-1]    
 
         allLinksToExpose = []
@@ -80,6 +55,37 @@ class mailreader:
         return allLinksToExpose
 
 
+    def getLinksFromSearch(self, typ, county, city ):
+        countPages = self.__getPageNumber("https://www.immobilienscout24.de/Suche/S-T/"+ typ +"/"+ county +"/"+ city)
+        linksToObj = []
+        for i in range(1, countPages+1):
+            obj = "https://www.immobilienscout24.de/Suche/S-T/P-"+ str(i) +"/"+ typ +"/"+ county +"/"+ city
+            try:
+                #todo
+                page = urlopen(obj)
+            except:
+                print("exteion occured")
+                continue
+            parsed = BeautifulSoup(page, 'html.parser')
+
+            # if(countPages == 1 and start == True):                
+            #     start = False
+            
+            exposes = []
+            pattern = re.compile('\/expose\/[1-9]+')
+            patternis24 = re.compile(r'is24')
+            links = parsed.findAll('a', href=True)
+            for a in links:
+                if(pattern.match(a['href']) and len(a['href']) <= 18):
+                    exposes.append(a['href'])
+                    print(a['href'])
+            
+            linksToObj.append(list(set(exposes)))
+
+            print(linksToObj)
+        return linksToObj
+
+
     def __getExposeLinks(self,links):
         complete = []
         for i in links:
@@ -99,8 +105,24 @@ class mailreader:
             elif type == 'text':
                 return msg.get_payload()  
     
+    def __getPageNumber(self, obj):
+        try:
+            page = urlopen(obj)
+        except:
+            print("exeption occured")
+
+        parsed = BeautifulSoup(page, 'html.parser')
+        countPages = 1
+        selector = parsed.find_all(class_='select font-standard')
+        print(selector.count)
+        if(selector != []):
+            for option in selector[0].contents:
+                foundPages = option['value']
+                countPages = int(foundPages.replace("'", ""))
+        return countPages
     
 
-#readMail()
+# mr = mailreader()
+# mr.getLinksFromSearch("Wohnung-Kauf","Bayern","Nuernberg")
 
 
